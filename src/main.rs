@@ -1,10 +1,10 @@
 use bevy::{
-    //core::FixedTimestep,
     prelude::*,
     render::pass::ClearColor,
-    sprite::collide_aabb::{collide, Collision},
+    //sprite::collide_aabb::{collide, Collision},
 };
-use std::{thread::*, time::*, fmt::Debug};
+//use std::{thread::*, time::*, fmt::Debug};
+use std::{time::*, fmt::Debug};
 use rand::*;
 
 
@@ -21,7 +21,7 @@ struct Bullet {
 }
 
 struct EnemyBullet {
-    speed: f32, 
+    //speed: f32, 
 }
 
 #[derive(Debug)]
@@ -72,7 +72,7 @@ struct Hud {
 }
 
 impl Hud{
-    fn addPoint(&mut self, point: f32){
+    fn add_point(&mut self, point: f32){
         self.points += point;
     }
 
@@ -84,7 +84,7 @@ impl Hud{
         self.win = true;
     }
 
-    fn lostLife(&mut self, point: i16){
+    fn lost_life(&mut self, point: i16){
         self.lives -= point;
     }
 
@@ -105,12 +105,18 @@ fn setup(
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
 
+
     //spawn the ship, fleet_id, and hud data
     commands
         .spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(0.3, 0.3, 1.0).into()),
-            transform: Transform::from_xyz(0.0, -225.0, 0.0),
-            sprite: Sprite::new(Vec2::new(30.0, 30.0)),
+            //material: materials.add(Color::rgb(0.3, 0.3, 1.0).into()),
+            material: materials.add(asset_server.load("./images/ship.png").into()),
+            //transform: Transform::from_xyz(0.0, -225.0, 0.0),
+            transform: Transform {
+                translation: Vec3::new(0.0, -256.0, 0.0),
+                rotation: Quat::identity(),
+                scale: Vec3::new(1.0, 1.0, 1.0), },
+            //sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
             })
         .insert(Ship { speed: 500.0, 
@@ -172,11 +178,19 @@ fn setup(
         for y in 0..4 {
             commands
                 .spawn_bundle(SpriteBundle {
-                    material: materials.add(Color::rgb(0.9, 0.5, 0.3).into()),
-                    transform: Transform::from_xyz(x_offset + x as f32 * 70.0,
-                                                    y_offset + y  as f32 * 70.0,
-                                                    0.0),
-                    sprite: Sprite::new(Vec2::new(30.0, 30.0)),
+                    // material: materials.add(Color::rgb(0.9, 0.5, 0.3).into()),
+                    // transform: Transform::from_xyz(x_offset + x as f32 * 70.0,
+                    //                                 y_offset + y  as f32 * 70.0,
+                    //                                 0.0),
+                    // sprite: Sprite::new(Vec2::new(30.0, 30.0)),
+
+                    material: materials.add(asset_server.load("./images/alien.png").into()),
+                    transform: Transform {
+                        translation: Vec3::new(x_offset + x as f32 * 70.0,
+                                                y_offset + y  as f32 * 70.0,
+                                                0.0,),
+                        rotation: Quat::identity(),
+                        scale: Vec3::new(0.8, 0.8, 0.8),},
                     ..Default::default()
                 })
                 .insert(Minnion {});
@@ -234,7 +248,7 @@ fn ship_control_system(
     mut query: Query<(&mut Ship, &mut Transform)>,
     mut hud_data: Query<&mut Hud>, 
     )   {
-    let mut hud = hud_data.iter_mut().next().unwrap();
+    let hud = hud_data.iter_mut().next().unwrap();
     
     if hud.lose == false {
         let mut direction = 0.0;
@@ -283,7 +297,7 @@ fn spawn_bullets(
             commands
                 .spawn_bundle(SpriteBundle {
                     material: materials.add(Color::rgb(0.8, 0.8, 0.2).into()),
-                    transform: Transform::from_xyz(x_pos, -200.0 , 0.0),
+                    transform: Transform::from_xyz(x_pos, -220.0 , 0.0),
                     sprite: Sprite::new(Vec2::new(10.0, 10.0)),
                     ..Default::default()
                     })
@@ -300,7 +314,7 @@ fn bullet_behavior(
     //time: Res<Time>,
     mut bullet_posistions: Query<(Entity, &Bullet, &mut Transform)>,
     ) {
-        for (b_entity, bullet, mut transform) in bullet_posistions.iter_mut(){
+        for (b_entity, _bullet, mut transform) in bullet_posistions.iter_mut(){
             transform.translation.y += 4.;
 
             if transform.translation.y >= 285.0 {
@@ -380,7 +394,7 @@ fn minnion_shoot(
                     sprite: Sprite::new(Vec2::new(10.0, 10.0)),
                     ..Default::default()
                     })
-                .insert(EnemyBullet { speed: 300.0 });
+                .insert(EnemyBullet { });
             }
             count += 1.0; 
         }
@@ -393,7 +407,7 @@ fn minnion_bullet_behavior(
     //time: Res<Time>,
     mut bullet_posistions: Query<(Entity, &EnemyBullet, &mut Transform)>,
     ) {
-        for (b_entity, bullet, mut transform) in bullet_posistions.iter_mut(){
+        for (b_entity, _bullet, mut transform) in bullet_posistions.iter_mut(){
             transform.translation.y -= 4.;
             if transform.translation.y <= -285.0 {
                 commands.entity(b_entity).despawn();
@@ -408,7 +422,7 @@ fn scoreboard_system(
     mut query: Query<&mut Text>,
     ) {
     let mut text = query.single_mut().unwrap();
-    let mut hud = hud_data.iter_mut().next().unwrap();
+    let hud = hud_data.iter_mut().next().unwrap();
     //println!("Asdf {:?}", hud.points);
     text.sections[0].value = format!("Score: {} Lives: {}", hud.points, hud.lives);
 }
@@ -420,6 +434,7 @@ fn check_minnion_hit(
     mut minnion_posistions: Query<(Entity, &mut Minnion, &Transform)>,
     mut fleet_control: Query<&mut Fleet>,
     mut hud_data: Query<&mut Hud>, 
+    
     )   {
         let mut fleet = fleet_control.iter_mut().next().unwrap(); 
         let mut hud = hud_data.iter_mut().next().unwrap();
@@ -434,7 +449,7 @@ fn check_minnion_hit(
                     if fleet.speed.abs() <= 7.0{
                         fleet.speed_up();
                     }
-                    hud.addPoint(1.0);
+                    hud.add_point(1.0);
                     
                 }
             }
@@ -445,18 +460,16 @@ fn check_player_hit(
     mut commands: Commands,
     mut e_bullet_posistions: Query<(Entity, &mut EnemyBullet, &Transform)>,
     mut ship_posistion: Query<(Entity, &mut Ship, &Transform)>,
-    mut fleet_control: Query<&mut Fleet>,
     mut hud_data: Query<&mut Hud>, 
     )   {
-        let mut fleet = fleet_control.iter_mut().next().unwrap(); 
         let mut hud = hud_data.iter_mut().next().unwrap();
 
-        for (entity_ship, _ship, ship_transform) in ship_posistion.iter_mut() {
+        for (_entity_ship, _ship, ship_transform) in ship_posistion.iter_mut() {
             for (entity_bullet, _bullet, bullet_transfrom) in e_bullet_posistions.iter_mut()  {
 
                 if collided( &ship_transform.translation, &bullet_transfrom.translation, 30.0){
                     commands.entity(entity_bullet).despawn();
-                    hud.lostLife(1);
+                    hud.lost_life(1);
                     
                 }
             }
@@ -476,20 +489,24 @@ fn check_for_minnions(
     mut materials: ResMut<Assets<ColorMaterial>>,
     minnion: Query<&Minnion>,
     mut hud_data: Query<&mut Hud>, 
+    asset_server: Res<AssetServer>,
     ) {
     let mut hud = hud_data.iter_mut().next().unwrap();
 
-    //This prevents the game logic from spawning the boss non stop. 
+    //This if statement prevents the game logic from spawning the boss non stop. 
     if minnion.iter().count() == 0  && hud.boss_mode == false{
         commands
         .spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(0.3, 0.3, 1.0).into()),
-            transform: Transform::from_xyz(0.0, 100.0, 0.0),
-            sprite: Sprite::new(Vec2::new(150.0, 100.0)),
+            material: materials.add(asset_server.load("./images/bossalien2.png").into()),
+            
+            transform: Transform {
+                translation: Vec3::new(0.0, 100.0, 0.0),
+                rotation: Quat::identity(),
+                scale: Vec3::new(0.5, 0.5, 0.5), }, 
             ..Default::default()
             })
         .insert(Boss {
-            life: 10.0, 
+            life: 12.0, 
         });
 
         hud.spawned_boss(); 
@@ -501,10 +518,9 @@ fn check_boss_hit(
     mut commands: Commands,
     mut bullet_posistions: Query<(Entity, &mut Bullet, &Transform)>,
     mut boss_posistions: Query<(Entity, &mut Boss, &Transform)>,
-    mut fleet_control: Query<&mut Fleet>,
     mut hud_data: Query<&mut Hud>, 
     )   {
-        let mut fleet = fleet_control.iter_mut().next().unwrap(); 
+        
         let mut hud = hud_data.iter_mut().next().unwrap();
 
         for (entity_boss, mut boss, boss_transform) in boss_posistions.iter_mut() {
@@ -515,7 +531,7 @@ fn check_boss_hit(
 
                     if boss.life == 0.0 {
                         commands.entity(entity_boss).despawn();
-                        hud.addPoint(10.0);
+                        hud.add_point(10.0);
                         hud.win();
                     } else{
                         boss.hit();
@@ -528,11 +544,10 @@ fn check_boss_hit(
 
 fn check_game_win(
     mut hud_data: Query<&mut Hud>,
-    mut commands: Commands,
     mut query: Query<&mut Text>,
     )   {
         let mut text = query.single_mut().unwrap();
-        let mut hud = hud_data.iter_mut().next().unwrap();
+        let hud = hud_data.iter_mut().next().unwrap();
         
         if hud.win == true {
             text.sections[1].value = format!("       You Win!!!");
@@ -540,9 +555,8 @@ fn check_game_win(
 }
 
 fn check_game_over(
-    mut commands: Commands,
+    //commands: Commands, // see commentted out code below
     mut hud_data: Query<&mut Hud>,
-    mut ship_q: Query<(Entity, &mut Ship, &Transform)>,
     mut query: Query<&mut Text>,
     )   {
         let mut text = query.single_mut().unwrap();
