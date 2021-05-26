@@ -2845,6 +2845,7 @@ name = "space_invaders_bevy"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "rand",
 ]
 
 [[package]]
