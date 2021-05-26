@@ -3,6 +3,7 @@
 A space invaders like clone using Rust / Bevy.
 
 Guides I used to help make was from the offical guide here https://github.com/bevyengine/bevy, as well as https://github.com/bevyengine/awesome-bevy
+
 Ship and Alien Sprites were found in the Python Crash Course guide by Eric Matthes. 
 
 ![screenshot](https://raw.githubusercontent.com/JasonAJordan/space_invader_bevy/master/assets/images/game.PNG)
