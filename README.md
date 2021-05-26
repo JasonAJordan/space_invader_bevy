@@ -1,12 +1,17 @@
-### Space invader clone made in Bevy.
+# Space invader clone made in Bevy.
 
-Followed a simliar game layout to bevy's example game breakout. Found Here https://github.com/bevyengine/bevy
+A space invaders like clone using Rust / Bevy.
+
+Guides I used to help make was from the offical guide here https://github.com/bevyengine/bevy, as well as https://github.com/bevyengine/awesome-bevy
 
 ## How to play
 
-# Controls 
+### How to run
+Use Cargo run. 
+
+### Controls 
 Left and Right to move the spaceship around
 Space to fire the beam. 
-
-# Goals 
+Esc to quit. 
+### Goals 
 Try to beat all the aliens before you run out of lives. 
